@@ -1,0 +1,10 @@
+target
+contracts
+node_modules
+.next
+.git
+.github
+*.rs
+Cargo.lock
+Cargo.toml
+/contracts
