@@ -91,7 +91,9 @@ sequenceDiagram
 - **Time-Locked Payout Intervals**: Set customized payment periods (from 1 minute for test loop up to monthly) and lock payouts until they are due.
 - **Real-Time Event Streaming**: Automatically poll and render contract-emitted events in an Activity Feed without manual refresh.
 - **Production Transaction Queue**: Monitor the complete lifecycle of pending, processing, confirmed, and failed blockchain transactions.
-- **Freighter Wallet Integration**: Connect and disconnect Freighter wallet, switch networks, and handle account updates instantly.
+- **Stellar Wallets Integration**: Connect and disconnect Freighter wallet and other compatible wallets (Albedo, xBull, Fordefi, Rabet, etc.) using the integrated Stellar Wallets Kit.
+
+  ![Stellar Wallet Options](public/wallet_modal.png)
 - **Mobile Responsive Design**: Clean, minimal, adaptive whitish design with no gradients, fully usable across desktop, tablet, and mobile browsers.
 
 ---
