@@ -1,209 +1,245 @@
 # StellarPay: Decentralized Payroll & Treasury Vault Console
 
-A polished Next.js 15 operator dashboard for a Soroban smart contract ecosystem that lets company admins register employees, manage treasury funding allocations, release time-locked salary claims, and inspect real-time on-chain logs from a single unified console.
+StellarPay is a decentralized payroll, employee management, and treasury vault DApp powered by **Soroban Smart Contracts**, **Next.js 15**, and **StellarWalletsKit**. 
+
+This DApp enables organizations to register employees, allocate working capital into a dedicated treasury vault, and release time-locked salary claims. Employees claim their salaries directly to their wallets once their payout intervals elapse.
 
 ---
 
-# Product Overview
+## 🔗 Project Links
 
-Managing global team payroll transparently and on time is a core operational challenge. Legacy centralized payroll processors introduce high transfer fees, delayed cross-border clearances, and single-point-of-failure vulnerabilities. 
-
-**StellarPay** solves this by establishing a decentralized payroll management system built on the Stellar network. It provides a secure, automated, and tamper-proof structure where employers can commit funds into a dedicated on-chain Treasury vault, and employees can verify their details and claim salaries directly to their Freighter wallets according to their frequency rules.
+* **GitHub Repository**: [Debjit2821/level3](https://github.com/Debjit2821/level3)
+* **Live Demo**: [StellarPay Production App](https://level3-rosy.vercel.app/)
+* **Demo Video**: [StellarPay Walkthrough (YouTube)](https://youtu.be/demo-video-placeholder)
 
 ---
 
-# Architecture Diagram
+## 📸 Screenshots & Proof of Architecture
 
-The system employs a modular, secure smart contract architecture to segregate concerns:
+### 1. Landing Portal
+*StellarPay landing interface displaying organizational tools, live statistics, and secure wallet connectivity.*
+![Landing Portal](public/screenshots/landing_page.png)
 
-```mermaid
-graph TD
-    User([Employer or Employee]) -->|Freighter Wallet| FE[Next.js 15 Frontend]
-    FE -->|Zustand & React Query| AppState[State & Service Layer]
-    AppState -->|Soroban RPC / Horizon| RPC[Stellar Testnet RPC]
-    
-    subgraph Soroban Smart Contracts
-        Manager[Payroll Manager Contract]
-        Treasury[Payroll Treasury Contract]
-        Token[Native XLM SAC Token]
-        
-        Manager -->|1. Validate eligibility & auth| Manager
-        Manager -->|2. C2C Call: disburse| Treasury
-        Treasury -->|3. Call: transfer| Token
-    end
-    
-    RPC -->|Submit Tx / Query State| Manager
-    RPC -->|Retrieve Events| Manager
+### 2. Dashboard & Platform Analytics
+*User dashboard displaying active payroll details, employee registry, treasury statistics, and historical logs.*
+![Dashboard Analytics](public/screenshots/dashboard.png)
+
+### 3. Stellar Expert Explorer
+*On-chain verification showing smart contract transaction trace, event logs, and status updates on the Stellar Testnet.*
+![Stellar Explorer](public/screenshots/explorer.png)
+
+### 4. Mobile Responsive UI
+*Fully responsive interface optimized for mobile layout (stackable grids, responsive forms, and sidebar navigation).*
+![Mobile Responsive UI](public/screenshots/mobile.png)
+
+### 5. CI/CD Integration pipeline
+*GitHub Actions workflow verifying smart contract checks, linter validations, typescript type-checks, and production bundle builds.*
+![CI/CD Pipeline](public/screenshots/ci_cd_pipeline.png)
+
+### 6. Wallet Options
+*StellarWalletsKit integration offering multiple wallet connection methods (Freighter, Albedo, Hana, xBull).*
+![Wallet Options](public/screenshots/wallet_options.png)
+
+---
+
+## ⛓ Deployed Addresses (Stellar Testnet)
+
+* **Payroll Manager Contract Address**: `CCZT6V2SXFK53U7EPZCERT54CBGJVJHYJKOCNWZWGR7FE4UWLUHBQYHM` (referred to as `MANAGER_CONTRACT` in config)
+* **Payroll Treasury Contract Address**: `CBHJ63OISWUYB6VR7EQ3X3BFNFZTJNUFSG5S24TWYOQ57CGIHHWABEJ5` (referred to as `TREASURY_CONTRACT` in config)
+* **XLM SAC Token Address**: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` (referred to as `TOKEN_CONTRACT` in config)
+* **Deployer Address**: `GDT37UGSKAIKDUGC73VHAI6HASL27O5YTCHONKRIIH7AJBMBIQPWRVX3`
+* **Example Contract Deployment Tx**: `6ea068469b358580aae15247b18113f997c7ae9bf6c33212c3749e42fc196084` (referred to as `TRANSACTION_HASH_HERE` in config)
+* **Explorer Link**: [Stellar Expert Explorer](https://stellar.expert/explorer/testnet/tx/6ea068469b358580aae15247b18113f997c7ae9bf6c33212c3749e42fc196084)
+
+---
+
+## 🔑 Authentication Architecture
+
+StellarPay uses **Stellar Wallet Addresses (Wallet ID)** as the primary key for authentication and login.
+
+```
+[Stellar Wallet]
+  ( Freighter / Albedo / xBull )
+       │
+       ▼  (connectWallet() via StellarWalletsKit)
+ [Stellar Address]  ──► (Primary Key)
+       │
+       ▼  (Zustand store: setAddress())
+ [isConnected: true]
+       │
+       ├─► LocalStorage Sync (persists session)
+       ▼
+ [Dashboard & Control Panels]
+       │
+       ├─► Connected: Render Admin Console, Employee Console, & Event Stream
+       └─► Disconnected: Show "Connect Wallet" Prompt
 ```
 
----
-
-# Smart Contract Design
-
-StellarPay splits business logic and asset storage into two separate contracts:
-
-1. **`payroll-treasury`**: Handles the vault and disbursements.
-   - Enforces that only the registered `payroll-manager` contract is authorized to trigger `disburse` operations.
-   - Tracks total deposits, total disbursements, and vault balances on-chain.
-   - Allows the contract admin (owner) to safely deposit and withdraw funds.
-2. **`payroll-manager`**: Core payroll logic, access control, and employee directory.
-   - Defines the custom storage structure `Employee` containing the address, salary rate, payout interval frequency (in seconds), next payout eligibility timestamp, active/inactive status, role title, and last payment timestamp.
-   - Restricts employee additions, updates, and terminations to the contract Admin.
-   - Allows employees to trigger `claim_payroll` once their payout interval timer has elapsed.
+1. **Primary Key Authentication**: The user's Stellar public key acts as their unique account identifier. The DApp does not require traditional email/password credentials.
+2. **Session Persistence**: Once connected, the user's wallet address is stored in `localStorage` under the key `stellar_connected_address` and managed globally via the Zustand state store (`hooks/use-payroll-store.ts`). This ensures the connection state persists through page reloads.
+3. **Interactive Control Panels**: Client-side pages are reactive. When the wallet is connected, the UI shows relevant details (such as wallet address, network, balance) and enables the actions forms (add employee, disburse, claim payroll). If disconnected, it prompts for connection.
+4. **Log Out**: Clicking the wallet button and selecting "Disconnect" clears both the Zustand store memory and `localStorage` session keys.
 
 ---
 
-# Inter-Contract Communication Flow
+## 📜 Soroban Smart Contract Specifications
 
-The interaction between the manager and treasury contracts is detailed below:
+### File Location: [`contracts/payroll-manager/src/lib.rs`](./contracts/payroll-manager/src/lib.rs) & [`contracts/payroll-treasury/src/lib.rs`](./contracts/payroll-treasury/src/lib.rs)
 
-```mermaid
-sequenceDiagram
-    actor Employee
-    participant Frontend as Next.js Console
-    participant Manager as Payroll Manager Contract
-    participant Treasury as Payroll Treasury Contract
-    participant Token as XLM Token Contract
+### 1. Data Structures & Types
+The contracts store state entries using Soroban's instance and persistent storage.
 
-    Employee->>Frontend: Click "Claim Payroll"
-    Frontend->>Manager: claim_payroll(employee_address)
-    Note over Manager: Verify caller is active employee<br/>Verify current_time >= next_payout_time
-    Manager->>Treasury: disburse(employee_address, salary_amount, token_address)
-    Note over Treasury: Assert caller is Payroll Manager
-    Treasury->>Token: transfer(treasury_address, employee_address, salary_amount)
-    Token-->>Treasury: Success
-    Treasury-->>Manager: Success
-    Note over Manager: Update employee.last_paid_at = current_time<br/>Update employee.next_payout_time += pay_frequency
-    Manager-->>Frontend: Transaction Confirmed
-    Frontend-->>Employee: Display success notification
+```rust
+// Storage Keys (Payroll Manager)
+pub enum DataKey {
+    Admin,              // Instance storage: address of contract admin
+    Treasury,           // Instance storage: address of the payroll treasury contract
+    Token,              // Instance storage: address of the default payment token (XLM SAC)
+    EmployeesList,      // Persistent storage: Vec of employee addresses
+    Employee(Address),  // Persistent storage: maps employee address to Employee struct
+}
+
+// Employee Struct (Payroll Manager)
+pub struct Employee {
+    pub address: Address,      // Account address of the employee
+    pub salary: i128,          // Salary amount per payout cycle
+    pub pay_frequency: u64,    // Payout cycle interval in seconds
+    pub next_payout_time: u64, // Unix timestamp in seconds for next payout eligibility
+    pub role: String,          // Role / job title of the employee
+    pub active: bool,          // Whether the employee is currently active
+    pub last_paid_at: u64,     // Unix timestamp of the last payout
+}
+
+// Storage Keys (Payroll Treasury)
+pub enum DataKey {
+    Admin,                    // Instance storage: address of treasury admin
+    Manager,                  // Instance storage: address of the payroll manager contract
+    TotalDeposited(Address),  // Instance storage: total deposited amount per token address
+    TotalDisbursed(Address),  // Instance storage: total disbursed amount per token address
+}
 ```
 
-- **Permission Verification**: The `payroll-treasury` contract checks if the caller matches the stored `manager_id` before performing any disbursements.
-- **Event Propagation**: Detailed events are emitted by both contracts at each step of the pipeline.
+### 2. Contract Interfaces (Functions)
+
+#### Payroll Manager Contract
+* **`initialize(env: Env, admin: Address, treasury: Address, token: Address)`**: Sets up the payroll manager contract. Can only be invoked once.
+* **`add_employee(env: Env, employee: Address, salary: i128, pay_frequency: u64, role: String)`**: Allows the admin to register a new employee. Emits event `emp_added`.
+* **`update_employee(env: Env, employee: Address, salary: i128, pay_frequency: u64, role: String)`**: Allows the admin to update details of an existing employee. Emits event `emp_updated`.
+* **`terminate_employee(env: Env, employee: Address)`**: Allows the admin to terminate an employee (marks inactive). Emits event `emp_terminated`.
+* **`claim_payroll(env: Env, employee: Address)`**: Allows an active employee to claim their salary once the payment frequency has elapsed. Calls linked treasury contract. Emits event `payroll_claimed`.
+* **`update_treasury(env: Env, new_treasury: Address)`**: Allows the admin to change the linked treasury address.
+* **`update_admin(env: Env, new_admin: Address)`**: Allows the admin to transfer contract ownership to a new administrator.
+* **`get_employee(env: Env, employee: Address) -> Option<Employee>`**: Queries details for a registered employee.
+* **`get_employees(env: Env) -> Vec<Address>`**: Queries a list of all registered employee addresses.
+
+#### Payroll Treasury Contract
+* **`initialize(env: Env, admin: Address, manager: Address)`**: Sets up the payroll treasury contract. Can only be invoked once.
+* **`disburse(env: Env, to: Address, amount: i128, token: Address)`**: Triggers token disbursement from the treasury to an employee. Restricted to the authorized manager contract. Emits event `disbursed`.
+* **`deposit(env: Env, from: Address, amount: i128, token: Address)`**: Records deposit to the treasury. Transfers tokens from sender to treasury. Emits event `deposited`.
+* **`withdraw(env: Env, to: Address, amount: i128, token: Address)`**: Allows the admin to withdraw tokens from the treasury vault. Emits event `withdrawn`.
+* **`update_manager(env: Env, new_manager: Address)`**: Allows the admin to update the authorized payroll manager address.
+* **`update_admin(env: Env, new_admin: Address)`**: Allows the admin to transfer treasury vault ownership.
 
 ---
 
-# Features
+## 🚀 User Proof of Concept (PoC) Walkthrough
 
-- **Treasury Vault Management**: Fund the vault directly using XLM and monitor available balance.
-- **Access Control & Permissions**: Strict role-based security separating admin actions from employee claims.
-- **On-Chain Employee Registry**: Register and terminate employee profiles dynamically.
-- **Time-Locked Payout Intervals**: Set customized payment periods (from 1 minute for test loop up to monthly) and lock payouts until they are due.
-- **Real-Time Event Streaming**: Automatically poll and render contract-emitted events in an Activity Feed without manual refresh.
-- **Production Transaction Queue**: Monitor the complete lifecycle of pending, processing, confirmed, and failed blockchain transactions.
-- **Stellar Wallets Integration**: Connect and disconnect Freighter wallet and other compatible wallets (Albedo, xBull, Fordefi, Rabet, etc.) using the integrated Stellar Wallets Kit.
+Follow this step-by-step test scenario to experience the DApp's core payroll lifecycle on the Stellar Testnet.
 
-  ![Stellar Wallet Options](public/wallet_modal.png)
-- **Mobile Responsive Design**: Clean, minimal, adaptive whitish design with no gradients, fully usable across desktop, tablet, and mobile browsers.
-
----
-
-# Tech Stack
-
-- **Core Framework**: [Next.js 15](https://nextjs.org/) (App Router, TypeScript)
-- **State Store**: [Zustand v5](https://github.com/pmndrs/zustand)
-- **Server Cache & Synchronization**: [React Query v5](https://tanstack.com/query/latest)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (Minimalist Whitish aesthetic with flat borders and bright orange accents)
-- **Smart Contracts**: [Soroban SDK v26](https://soroban.stellar.org/)
-- **Wallet Connection**: [@creit.tech/stellar-wallets-kit](https://github.com/CreitTech/stellar-wallets-kit)
-
-## Contract Explorer
-
-- **Stellar Expert (Payroll Manager Contract)**: https://stellar.expert/explorer/testnet/contract/CCZT6V2SXFK53U7EPZCERT54CBGJVJHYJKOCNWZWGR7FE4UWLUHBQYHM
-- **Stellar Expert (Payroll Treasury Contract)**: https://stellar.expert/explorer/testnet/contract/CBHJ63OISWUYB6VR7EQ3X3BFNFZTJNUFSG5S24TWYOQ57CGIHHWABEJ5
-
----
-
-# Environment Variables
-
-Create a `.env.local` file in the root directory:
-
-```env
-NEXT_PUBLIC_MANAGER_CONTRACT_ID=CCZT6V2SXFK53U7EPZCERT54CBGJVJHYJKOCNWZWGR7FE4UWLUHBQYHM
-NEXT_PUBLIC_TREASURY_CONTRACT_ID=CBHJ63OISWUYB6VR7EQ3X3BFNFZTJNUFSG5S24TWYOQ57CGIHHWABEJ5
-NEXT_PUBLIC_TOKEN_CONTRACT_ID=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
-NEXT_PUBLIC_STELLAR_NETWORK=testnet
-NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
+```
+       AUTHENTICATE              DEPOSIT FUNDS              ADD EMPLOYEE
+┌────────────────────────┐  ┌───────────────────┐  ┌────────────────────┐
+│ 1. Connect wallet      │─►│ 2. Fund treasury  │─►│ 3. Register payee  │
+│    and sign in session │  │    vault with XLM │  │    salary details  │
+└────────────────────────┘  └───────────────────┘  └────────────────────┘
+                                                             │
+                                                             ▼
+         COMPLETED                 CLAIM SALARY             VERIFICATION
+┌────────────────────────┐  ┌───────────────────┐  ┌────────────────────┐
+│ 6. Verify payout state  │◄─│ 5. Employee claims │◄─│ 4. Track events on │
+│    & on-chain history  │  │    available salary │  │    active streams  │
+└────────────────────────┘  └───────────────────┘  └────────────────────┘
 ```
 
+### Step 1: Wallet Authentication
+1. Install [Freighter Wallet](https://www.freighter.app/) extension and switch network to **Testnet**.
+2. Go to the StellarPay landing page (`http://localhost:3000`).
+3. Click **Access Operator Console** or **Connect Wallet** and select Freighter. Approve the connection.
+4. Once authenticated, your session is established, and the interactive panels unlock.
+
+### Step 2: Deposit Treasury Vault Funding
+1. Before employees can claim salaries, the Treasury vault must contain sufficient XLM tokens.
+2. In the **Admin Console** panel under the "Deposit Vault" card, enter the deposit amount (e.g., `1000 XLM`).
+3. Click **Deposit Funds** and confirm the transaction in Freighter. This transfers XLM from the admin account directly to the `payroll-treasury` contract.
+4. Verify that the **Vault Balance** updates dynamically to reflect the new total.
+
+### Step 3: Register an Employee
+1. In the **Admin Console** under the "Register Employee" card, fill out the employee details:
+   - **Employee Address**: The recipient's public key (e.g., your own address for testing).
+   - **Salary (XLM)**: E.g., `100 XLM`
+   - **Pay Frequency**: Choose a time duration (e.g., `1 Minute` for testing/demo or custom hours/days).
+   - **Role / Job Title**: E.g., `Senior Rust Developer`
+2. Click **Register Employee** and sign the transaction in Freighter.
+3. Verify that the employee appears in the "Registered Employees Directory" showing the status **Active** and eligibility is marked as **Eligible Now**.
+
+### Step 4: Track Events and Logs
+1. Look at the **Activity Feed** panel.
+2. Verify that the `emp_added` event is displayed in real-time.
+3. Check the **Transaction Center** to monitor the transaction status (`pending` -> `success`).
+
+### Step 5: Claim Salary
+1. Switch your view to the **Employee Console** tab.
+2. Find the employee profile in the listing (if you used your connected wallet address).
+3. If the payment frequency duration has passed (or immediately if newly registered), you will see **Eligible** next to your profile.
+4. Click **Claim Salary** and sign the transaction in Freighter.
+5. Verify that:
+   - The employee's individual balance increases by `100 XLM`.
+   - The Vault Balance decreases by `100 XLM`.
+   - The employee's `last_paid_at` updates to the current block time, and `next_payout_time` updates dynamically according to the frequency.
+
+### Step 6: Settle & Complete Payout verification
+1. Observe the **Activity Feed** to confirm the `payroll_claimed` event was successfully emitted by the contract and processed by the client.
+2. Confirm the payout txn trace is correctly recorded on the Stellar Testnet ledger.
+
 ---
 
-# Local Development
+## 🛠 Setup & Run Instructions
+
+### Prerequisites
+* [Node.js](https://nodejs.org) (v18+)
+* [Rust & Cargo](https://rustup.rs/)
+* [Stellar CLI](https://developers.stellar.org/docs/tools/cli)
 
 ### 1. Install Dependencies
 ```bash
+git clone https://github.com/Debjit2821/level3.git
+cd level3
 npm install --ignore-scripts
 ```
 
-### 2. Run Next.js Development Server
+### 2. Compile & Test Smart Contract
+```bash
+# Set Path variables on Windows environment if required
+$env:PATH="C:\Users\debji\.rustup\toolchains\stable-x86_64-pc-windows-gnu\lib\rustlib\x86_64-pc-windows-gnu\bin\self-contained;$env:PATH"
+
+# Run tests
+cargo test --offline
+```
+
+### 3. Run Locally
+Start the Next.js development server:
 ```bash
 npm run dev
 ```
-Open `http://localhost:3000` to view the console.
+Open `http://localhost:3000` in your browser.
 
-### 3. Build Production Target
+### 4. Build Production Target
 ```bash
 npm run build
 ```
 
----
-
-# Testing
-
-### Run Smart Contract Rust Tests
+### 5. Contract Deployment
+To compile contracts, create a deployer keypair, fund it, deploy the contract WASMs, and initialize them, run:
 ```bash
-$env:PATH="C:\Users\debji\.rustup\toolchains\stable-x86_64-pc-windows-gnu\lib\rustlib\x86_64-pc-windows-gnu\bin\self-contained;$env:PATH"
-cargo test --offline
+node scripts/deploy.js
 ```
-
-### Run Frontend Unit & Integration Tests
-```bash
-npm run test
-```
-
----
-
-# CI/CD
-
-Automated pipelines are configured using GitHub Actions:
-
-- **Pull Request Workflow ([pr.yml](.github/workflows/pr.yml))**: Automatically installs dependencies, runs linter rules, type checks TypeScript files, and runs the Vitest suite on any PR target.
-- **Deployment Workflow ([deploy.yml](.github/workflows/deploy.yml))**: Executes tests, compiles smart contracts, and verifies production web bundle builds when changes merge to `main`.
-
----
-
-# Deployment
-
-### Vercel Deployment
-To deploy the frontend to Vercel, run:
-```bash
-npx vercel --prod --yes
-```
-
-### Contract Deployment
-The deployment script is located in `scripts/deploy.js`. It automates building, deploying WASM to Testnet, initializing instances, and cross-linking addresses.
-
----
-
-# Security Considerations
-
-1. **Access Control**: All state-modifying functions (like adding employees or withdrawing from treasury) check that the transaction sender matches the Admin address.
-2. **Contract-to-Contract Security**: The treasury contract strictly checks that the caller of `disburse` is the authorized manager contract address.
-3. **Reentrancy and Timing protection**: Double claims are prevented by requiring `ledger_timestamp >= next_payout_time`, and updating state *before* confirming claims.
-4. **Environment protection**: All sensitive network variables are configured via standard public env bindings.
-
----
-
-# Project Deployments
-
-### Contract Addresses
-- **Payroll Manager Contract ID**: `CCZT6V2SXFK53U7EPZCERT54CBGJVJHYJKOCNWZWGR7FE4UWLUHBQYHM`
-- **Payroll Treasury Contract ID**: `CBHJ63OISWUYB6VR7EQ3X3BFNFZTJNUFSG5S24TWYOQ57CGIHHWABEJ5`
-- **XLM SAC Token Address**: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
-
-### Transaction Hash
-- **Treasury Init Transaction**: `187d5fc444308b93fe046c3ab4e33b9cd57e54ef3f22e6a872f831dd2c31b435`
-- **Manager Init Transaction**: `6ea068469b358580aae15247b18113f997c7ae9bf6c33212c3749e42fc196084`
-
-### Live Demo
-- **Vercel Production Site**: https://level3-rosy.vercel.app
