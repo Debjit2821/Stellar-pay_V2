@@ -159,7 +159,7 @@ function run() {
   }
 
   // Default SAC token (Stellar Testnet XLM SAC Contract)
-  const xlmSacContract = "CACUJUEJWSNL544KHIGNSVBPRR33ZY3RGMRQHIMAK3VBFSTDPLYAC3T7";
+  const xlmSacContract = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
 
   // Stagger calls
   console.log("Waiting 6s before initializing Treasury...");
