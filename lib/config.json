@@ -1,0 +1,8 @@
+{
+  "managerContractId": "CCWJ6RKEXU3E2HYH7FRLFZWBL5TUYQMJQOFCCBCX4JZIM53WIAJXNO2A",
+  "treasuryContractId": "CBK5FEDSCE6HUD6266HOXMO57CEC7WUNDMD2ISJ4WJLY7LEEUKVWLE7I",
+  "tokenContractId": "CACUJUEJWSNL544KHIGNSVBPRR33ZY3RGMRQHIMAK3VBFSTDPLYAC3T7",
+  "network": "testnet",
+  "rpcUrl": "https://soroban-testnet.stellar.org",
+  "networkPassphrase": "Test Stellar Network ; September 2015"
+}
