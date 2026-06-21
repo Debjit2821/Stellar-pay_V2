@@ -10,7 +10,7 @@ This DApp enables organizations to register employees, allocate working capital 
 
 * **GitHub Repository**: [Debjit2821/level3](https://github.com/Debjit2821/level3)
 * **Live Demo**: [StellarPay Production App](https://level3-rosy.vercel.app/)
-* **Demo Video**: [StellarPay Walkthrough (YouTube)](https://youtu.be/demo-video-placeholder)
+
 
 ---
 
@@ -32,13 +32,10 @@ This DApp enables organizations to register employees, allocate working capital 
 *Fully responsive interface optimized for mobile layout (stackable grids, responsive forms, and sidebar navigation).*
 ![Mobile Responsive UI](public/screenshots/mobile.png)
 
-### 5. CI/CD Integration pipeline
-*GitHub Actions workflow verifying smart contract checks, linter validations, typescript type-checks, and production bundle builds.*
-![CI/CD Pipeline](public/screenshots/ci_cd_pipeline.png)
 
-### 6. Wallet Options
+### 5. Wallet Options
 *StellarWalletsKit integration offering multiple wallet connection methods (Freighter, Albedo, Hana, xBull).*
-![Wallet Options](public/screenshots/wallet_options.png)
+![Wallet Options](public/wallet_modal.png)
 
 ---
 
