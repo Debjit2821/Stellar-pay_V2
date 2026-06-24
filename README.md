@@ -40,7 +40,7 @@ This DApp enables organizations to register employees, allocate working capital 
 ![ci/cd](public/screenshots/Screenshot%202026-06-24%20151656.png)
 ### 7.Test Output :
  *Test output with 3+ passing tests*
- ![test output]()
+ ![test output](public/screenshots/Screenshot%202026-06-24%20154016.png)
 
 ---
 
