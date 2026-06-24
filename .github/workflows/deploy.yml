@@ -2,7 +2,9 @@ name: Deployment Workflow
 
 on:
 push:
-branches: [ main, master ]
+branches:
+- main
+- master
 
 jobs:
 deploy:
@@ -31,12 +33,10 @@ steps:
       targets: wasm32-unknown-unknown
 
   - name: Install Stellar CLI
-    run: |
-      cargo install --locked stellar-cli
+    run: cargo install --locked stellar-cli
 
   - name: Build Contracts
-    run: |
-      stellar contract build
+    run: stellar contract build
 
   - name: Set up Node.js
     uses: actions/setup-node@v4
@@ -45,8 +45,7 @@ steps:
       cache: npm
 
   - name: Install Dependencies
-    run: |
-      npm ci --ignore-scripts
+    run: npm ci --ignore-scripts
 
   - name: Run Tests
     run: |
@@ -54,8 +53,7 @@ steps:
       cargo test
 
   - name: Build Production Web App
-    run: |
-      npm run build
+    run: npm run build
     env:
       NEXT_PUBLIC_MANAGER_CONTRACT_ID: ${{ secrets.NEXT_PUBLIC_MANAGER_CONTRACT_ID }}
       NEXT_PUBLIC_TREASURY_CONTRACT_ID: ${{ secrets.NEXT_PUBLIC_TREASURY_CONTRACT_ID }}
