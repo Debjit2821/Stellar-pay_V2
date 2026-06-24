@@ -37,6 +37,7 @@ This DApp enables organizations to register employees, allocate working capital 
 *StellarWalletsKit integration offering multiple wallet connection methods (Freighter, Albedo, Hana, xBull).*
 ![Wallet Options](public/wallet_modal.png)
 ### 6. CI/CD Pipeline Verification
+![ci/cd](public/screenshots/Screenshot%202026-06-24%20151656.png)
 
 ---
 
