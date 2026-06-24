@@ -19,6 +19,10 @@ jobs:
             pkg-config \
             libdbus-1-dev \
             build-essential
+            ibudev-dev \
+            libssl-dev \
+            clang \
+            cmake
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
